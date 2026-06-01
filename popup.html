@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shopee Price Finder</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand-line">
+        <strong>Shopee Price Finder</strong>
+        <span>So giá cạnh tranh</span>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section class="card current-card compact-search-card">
+        <div class="search-header-grid">
+          <div class="search-product-col">
+            <div class="product-kicker-row">
+              <h2>Sản phẩm search</h2>
+            </div>
+
+            <div id="emptyState" class="empty-state hidden">
+              <h3>Chưa đọc được sản phẩm</h3>
+              <p>Hãy mở đúng trang chi tiết sản phẩm Shopee rồi bấm lại extension.</p>
+            </div>
+
+            <div id="currentProduct" class="current-product hidden">
+              <img id="currentImage" class="current-image" src="" alt="Ảnh sản phẩm">
+              <div class="current-info">
+                <div class="product-id-line"><span>ID: <span id="currentProductId">-</span></span><span class="product-dot">|</span><span id="cacheMeta" class="cache-meta muted">Chưa có dữ liệu lưu</span><span class="product-dot">·</span><span id="pageStatus" class="status-pill">Đang kiểm tra...</span></div>
+                <h3 id="currentName"></h3>
+                <div class="current-inline-meta">
+                  <strong id="currentPrice" class="current-price"></strong>
+                  <span id="currentRating"></span>
+                  <span id="currentSold"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="search-action-col">
+            <button id="findButton" class="find-button" type="button" disabled>Tìm</button>
+            <label class="search-control-row">
+              <span>Độ rộng</span>
+              <select id="searchModeSelect">
+                <option value="standard">Chuẩn</option>
+                <option value="wide" selected>Rộng</option>
+                <option value="very-wide">Rất rộng</option>
+              </select>
+            </label>
+            <label class="search-control-row">
+              <span>Kết quả</span>
+              <select id="returnLimitSelect">
+                <option value="30">30</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+              </select>
+            </label>
+            <button id="clearCachedResultsButton" class="clear-cache-button" type="button">Xóa</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="loadingState" class="loading-state hidden">
+        <div class="spinner"></div>
+        <p>Đang tìm và chấm điểm sản phẩm tương đồng...</p>
+      </section>
+
+      <section id="errorBox" class="error-box hidden"></section>
+
+      <section id="resultFilterBox" class="result-filter hidden">
+        <div class="filter-label-row">
+          <label>Bộ lọc kết quả</label>
+          <span id="filterCount">0/0 sản phẩm</span>
+        </div>
+        <div class="filter-grid filter-grid-v121">
+          <div class="filter-field filter-main">
+            <label for="resultFilterInput">Giữ lại sản phẩm chứa text</label>
+            <input id="resultFilterInput" type="search" placeholder="Giữ lại: siêu mỏng, nhám...">
+          </div>
+          <div class="filter-field filter-main">
+            <label for="excludeFilterInput">Loại trừ sản phẩm chứa text</label>
+            <input id="excludeFilterInput" type="search" placeholder="Loại trừ: kính, samsung, spigen...">
+          </div>
+          <div class="filter-field filter-small">
+            <label for="minSoldInput">Min bán</label>
+            <input id="minSoldInput" type="number" min="0" step="1" placeholder="Min bán">
+          </div>
+          <div class="filter-field filter-small">
+            <label for="minScoreInput">Min điểm</label>
+            <input id="minScoreInput" type="number" min="0" max="100" step="1" placeholder="Min điểm">
+          </div>
+          <label class="hcm-toggle" title="Chỉ hiển thị sản phẩm ở Thành phố Hồ Chí Minh">
+            <input id="onlyHcmCheckbox" type="checkbox">
+            <span>Chỉ HCM</span>
+          </label>
+          <button id="clearFilterButton" type="button">Xóa lọc</button>
+        </div>
+      </section>
+
+      <section id="results" class="results-table-wrap"></section>
+
+      <section class="debug-dock">
+        <section id="resultSummary" class="result-summary footer-summary hidden"></section>
+
+        <div class="dock-toolbar">
+          <details id="scoreGuide" class="score-guide hidden">
+            <summary>Cách tính điểm</summary>
+            <p>Tên /35, ngành hàng /15, rating /10, đã bán /25, giá gần /10, shop ở HCM +5. Tự loại sản phẩm lệch giá quá 50% so với sản phẩm đang xem. Hiển thị tối đa theo lựa chọn 30/50/100 kết quả.</p>
+          </details>
+
+          <details id="techInfoPanel" class="tech-info hidden">
+            <summary>Thông tin kỹ thuật</summary>
+            <div id="techInfoContent"></div>
+          </details>
+
+          <section class="debug-actions debug-bottom">
+            <button id="toggleDebugButton" class="debug-button" type="button">Debug</button>
+            <button id="copyDebugButton" class="debug-button" type="button">Copy</button>
+            <button id="clearDebugButton" class="debug-button ghost" type="button">Xóa</button>
+          </section>
+        </div>
+      </section>
+
+      <section id="debugPanel" class="debug-panel hidden">
+        <div class="debug-title-row">
+          <h2>Debug log</h2>
+          <span id="debugCount">0 dòng</span>
+        </div>
+        <pre id="debugOutput"></pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
